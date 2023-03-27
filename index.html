@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Colton Rowe  coltonrowe@ucsb.edu">
+<meta name="dcterms.date" content="2022-03-26">
+
+<title>Global Temperature Time Series Forecasting</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#abstract" id="toc-abstract" class="nav-link active" data-scroll-target="#abstract">Abstract</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation">Motivation</a></li>
+  <li><a href="#past-studies" id="toc-past-studies" class="nav-link" data-scroll-target="#past-studies">Past Studies</a></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
+  </ul></li>
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a>
+  <ul class="collapse">
+  <li><a href="#source" id="toc-source" class="nav-link" data-scroll-target="#source">Source</a></li>
+  <li><a href="#dataset" id="toc-dataset" class="nav-link" data-scroll-target="#dataset">Dataset</a></li>
+  </ul></li>
+  <li><a href="#explaination-of-methodologies" id="toc-explaination-of-methodologies" class="nav-link" data-scroll-target="#explaination-of-methodologies">Explaination of Methodologies</a>
+  <ul class="collapse">
+  <li><a href="#sarima" id="toc-sarima" class="nav-link" data-scroll-target="#sarima">SARIMA</a></li>
+  <li><a href="#auto-regressive-threshold" id="toc-auto-regressive-threshold" class="nav-link" data-scroll-target="#auto-regressive-threshold">Auto Regressive Threshold</a></li>
+  </ul></li>
+  <li><a href="#spectral-analysis" id="toc-spectral-analysis" class="nav-link" data-scroll-target="#spectral-analysis">Spectral Analysis</a></li>
+  <li><a href="#modeling" id="toc-modeling" class="nav-link" data-scroll-target="#modeling">Modeling</a>
+  <ul class="collapse">
+  <li><a href="#sarima-1" id="toc-sarima-1" class="nav-link" data-scroll-target="#sarima-1">SARIMA</a></li>
+  <li><a href="#threshold-model" id="toc-threshold-model" class="nav-link" data-scroll-target="#threshold-model">Threshold Model</a></li>
+  </ul></li>
+  <li><a href="#forecasting" id="toc-forecasting" class="nav-link" data-scroll-target="#forecasting">Forecasting</a>
+  <ul class="collapse">
+  <li><a href="#sarima-2" id="toc-sarima-2" class="nav-link" data-scroll-target="#sarima-2">SARIMA</a></li>
+  <li><a href="#threshold-model-1" id="toc-threshold-model-1" class="nav-link" data-scroll-target="#threshold-model-1">Threshold Model</a></li>
+  <li><a href="#comparison" id="toc-comparison" class="nav-link" data-scroll-target="#comparison">Comparison</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#references-and-appendix" id="toc-references-and-appendix" class="nav-link" data-scroll-target="#references-and-appendix">References and Appendix</a>
+  <ul class="collapse">
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Global Temperature Time Series Forecasting</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Colton Rowe<br> <a href="mailto:coltonrowe@ucsb.edu" class="email">coltonrowe@ucsb.edu</a> </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 26, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell">
+
+</div>
+<section id="abstract" class="level2">
+<h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
+<p>Time data is everywhere, and time series forecasting gives us tools to analyze this data. With a climate crisis on the horizon, it is important to analyze climate time series data in order to better prepare for the future. My project analyzes changes in global temperature from 1880 to the end of 2016, and forecasts these temperatures into the future. First, I perform spectral analysis to discover periodic trends in the data. This justifies the use of a seasonal model. Then, I transform the data and plot its ACF and PACF to find the best parameters for the SARIMA model. I then compare the AIC of select models to justify my choice of parameters. Next, I fit an Auto Regressive Threshold model. To pick the best parameters for this model, I perform a grid search of select <code>p1</code> and <code>p2</code> values, and I further infer that based upon the ACF and PACF plots, my choice of parameters makes sense. Finally, I use both my models to forecast global temperatures over the next 24 months from 2016.</p>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<section id="motivation" class="level3">
+<h3 class="anchored" data-anchor-id="motivation">Motivation</h3>
+<p>The goal of this project is to forecast global temperature to better understand the direction the climate is headed in the next century. Before taking action, it’s important to understand the problem you want to solve. Forecasting global temperature should help give a better picture of the coming ecological crisis, and clarify what actions need to be taken to slow climate change. This project will use two time series models to forecast how global temperature changes.</p>
+</section>
+<section id="past-studies" class="level3">
+<h3 class="anchored" data-anchor-id="past-studies">Past Studies</h3>
+<p>In a <a href="https://science2017.globalchange.gov/chapter/executive-summary/">study by the U.S. Global Change Research Program</a>, it was projected that in the best case, there would be no global temperature change in the next 80 years, and in the worse case, it could increase by as much as 3 degrees Celsius. They used GIS techniques to show how this temperature change could affect different regions, and also projected global carbon emissions. The results of this study are a reality check: if changes are not made, there could be permanent global consequences.</p>
+</section>
+<section id="methods" class="level3">
+<h3 class="anchored" data-anchor-id="methods">Methods</h3>
+<p>I have chosen to apply two models for this data: a SARIMA model, and an Auto Regressive Threshold model. I think the SARIMA model has a good chance of making reasonable predictions because global temperature has a 12-month periodicity. In order to give credence to the idea of a 12-month temperature cycle, I’ll use a periodogram to perform spectral analysis. If we find that there is seasonal periodocity in the data, our use of a Seasonal ARIMA model will be justified. I chose an Auto Regressive Threshold as my second model because I suspect that a sharp increase or decrease in temperature may be met with a quick response. A Threshold model allows us to model two sets of parameters for its AR component depending on if the values are above a certain threshold. By adding a level of differencing, we can change the parameters of the AR component based on an increase or decrease in temperature.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<section id="source" class="level3">
+<h3 class="anchored" data-anchor-id="source">Source</h3>
+<p>I sourced my data from <a href="https://datahub.io/core/global-temp#readme">https://datahub.io/core/global-temp#readme</a>, which itself was sourced from <a href="https://data.giss.nasa.gov/gistemp/">https://data.giss.nasa.gov/gistemp/</a>.</p>
+</section>
+<section id="dataset" class="level3">
+<h3 class="anchored" data-anchor-id="dataset">Dataset</h3>
+<p>I chose this data set because I am interested in how data science can be used to improve our future. I think it is important to moderate our behavior around climate and to understand how our actions effect the rest of the world. This data set contains average global temperature change from a “base temperature.” It wasn’t immediately obvious what this base temperature was, but after digging into the original source, I found that it was 14 degrees Celsius, which is the average global temperature between 1951 and 1980. It contains the data in terms of two sources: <code>GCAG</code> and <code>GISTEMP</code>. GISTEMP, developed by NASA, uses satellite data and other collection techniques in order to give an estimate for global mean temperature. GISTEMP is NASA’s standard for global mean temperature, so we will use the values from these rows for prediction.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>TempRaw <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"temp.csv"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>TempDF <span class="ot">&lt;-</span> TempRaw[<span class="fu">order</span>(TempRaw<span class="sc">$</span>Date),][TempRaw<span class="sc">$</span>Source <span class="sc">==</span> <span class="st">"GISTEMP"</span>,][,<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>)]</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>TempTS <span class="ot">&lt;-</span> <span class="fu">ts</span>(TempDF<span class="sc">$</span>Mean <span class="sc">+</span> <span class="dv">14</span>, <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">1880</span>,<span class="dv">1</span>), <span class="at">frequency =</span> <span class="dv">12</span>) <span class="co"># Global mean temperature from 1951-1980 was 14 degrees Celsius.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(TempTS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" style="width:65.0%"></p>
+</div>
+</div>
+<p>From an initial visual analysis, the data does not appear to be stationary because the mean changes over time. There also appears to be a seasonal component to the data. We will need to transform it to use it with a SARIMA model.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="explaination-of-methodologies" class="level2">
+<h2 class="anchored" data-anchor-id="explaination-of-methodologies">Explaination of Methodologies</h2>
+<section id="sarima" class="level3">
+<h3 class="anchored" data-anchor-id="sarima">SARIMA</h3>
+<p>An ARIMA model is an auto regressive integrated moving average model. ARIMA models have two components: an auto regressive part, which models the <span class="math inline">\(x_{n}\)</span> observation in terms of <span class="math inline">\(x_{n-1},x_{n-2},...,x_{n-p}\)</span>, and a moving average part, which smooths out the white noise in the data. Each of these terms have coefficients which are typically estimated using numerical analysis. the “integrated” part of the acronym just means that there is a level of differencing that is added to the data before it is fit, which lets us transform it to be stationary if it is not already. <code>p</code> is defined to be the number of terms in the “AR” part of the model, <code>q</code> is defined to be the number of terms in the “MA” part of the model, and <code>d</code> is defined to be the level of differencing used. The full model is written <span class="math inline">\(\text{ARIMA}(p,d,q)\)</span>.</p>
+<p>A SARIMA model is like ARIMA model, except it has an additional seasonal component which is fit in the same way as the entire ARIMA model. It is fit with its own <code>P</code>, <code>D</code>, and <code>Q</code>, which correspond to <code>p</code>, <code>d</code>, and <code>q</code> as you would expect. This seasonal component allows us to decipher periodic trends in the data. We can use spectral analysis to determine if there is periodicity in the data or not, and if it is appropriate to use a SARIMA model over an ARIMA model. The full SARIMA model is written <span class="math inline">\(\text{SARIMA}(p,d,q,P,D,Q,s)\)</span>, where <code>p</code>,<code>d</code>,<code>q</code>,<code>P</code>,<code>D</code>,<code>Q</code> are as before and <code>s</code> is the frequency, or the seasonality constant. This would be 12 in the case of a 12-month annual cycle, or 7 in the case of a 7-day weekly cycle.</p>
+</section>
+<section id="auto-regressive-threshold" class="level3">
+<h3 class="anchored" data-anchor-id="auto-regressive-threshold">Auto Regressive Threshold</h3>
+<p>An Auto Regressive Threshold model is like having two auto regressive models working together. Instead of just one AR model being fit, two (or more) AR models are fit to intervals which have values in a certain range, or above a certain threshold. This gives the model more flexibility than can normally be achived which an ARIMA or SARIMA model. The downside is that there is no “Seasonal” Auto Regressive Threshold model, so if we want to capture some of the seasonality, we need to use a very high order for each of the AR models. The <code>tar</code> function in the <code>TAS</code> package can automatically estimate what thresholds should be set for the data. We will use the given estimate, but know that these thresholds can be set in a variety of ways.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="spectral-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="spectral-analysis">Spectral Analysis</h2>
+<p>Spectral analysis is a technique for determining if there is periodicity in the data. This will help us determine if a seasonal model is best. We want to look at integer lags times 12 to decipher if there is a 12-month periodicity.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mvspec</span>(TempTS, <span class="at">log =</span> <span class="st">"yes"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>We see slight peaks at 1 and 2, suggesting there is some amount of periodicity in the data at lags <span class="math inline">\(1\times12\)</span> and <span class="math inline">\(2\times12\)</span>. This means a seasonal model is a reasonable choice for this data.</p>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="modeling" class="level2">
+<h2 class="anchored" data-anchor-id="modeling">Modeling</h2>
+<section id="sarima-1" class="level3">
+<h3 class="anchored" data-anchor-id="sarima-1">SARIMA</h3>
+<p>The data is not yet stationary, so let’s add a level of differencing with lags 1 and 12 to see if it can become stationary. We use a lag of 12 because our data is monthly data, and we would expect a yearly cycle of temperature peaks and dips. This means the seasonality parameter <code>s</code> equals 12.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> TempTS <span class="sc">%&gt;%</span> <span class="fu">diff</span>() <span class="sc">%&gt;%</span> <span class="fu">diff</span>(<span class="at">lag =</span> <span class="dv">12</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Visually the data looks very stationary.</p>
+<p>A SARIMA model with all of its parameters is written <span class="math inline">\(\text{SARIMA}(p,d,q)(P,D,Q)_s\)</span>. We have already found <code>d = 1</code> and <code>D = 1</code> by the first order differencing performed to our data. To find the remaining parameters for our SARIMA model, we look at the ACF and the PACF plots for the transformed data. The ACF plot describes the overall autocorrelation, and is used to find the order of the moving average component of the model. The PACF plot gives us the partial autocorrelation, and is used to determine the order of the autoregressive component.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf2</span>(y,<span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>In the ACF plot, we can see there is a peak at lag <code>1s</code>, but not at any other lags. This suggests <code>Q = 1</code>. In the PACF plot, the most significant peaks are the first 2, which suggests <code>P = 2</code>. So we have found the seasonal part of our model to be <code>P = 2</code>, <code>D = 1</code>, <code>Q = 1</code>.</p>
+<p>We again look at the PACF and ACF plots to determine the parameters for the ARIMA part of our model. We look at the values from <span class="math inline">\(1, 2, ... 11\)</span> to see if there are peaks. In the ACF plot, we see a peak at lag 1, which suggests <code>q = 1</code>. In the PACF plot, we see the most prominent peaks at lags <span class="math inline">\(1\)</span> adn <span class="math inline">\(2\)</span>. This suggests <code>p = 2</code>.</p>
+<p>Using the parameters we found, the model we will attempt to fit is <span class="math inline">\(\text{SARIMA}(2,1,1)(2,1,1)_{12}\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">=</span> <span class="fu">sarima</span>(TempTS, <span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>, <span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>, <span class="dv">12</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span>ttable</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     Estimate     SE   t.value p.value
+ar1    0.4718 0.0289   16.3009  0.0000
+ar2    0.2089 0.0278    7.5056  0.0000
+ma1   -0.9664 0.0140  -68.8250  0.0000
+sar1   0.0188 0.0271    0.6941  0.4877
+sar2   0.0664 0.0268    2.4724  0.0135
+sma1  -0.9659 0.0094 -103.1299  0.0000</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"AIC:"</span>); <span class="fu">print</span>(model<span class="sc">$</span>AIC)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "AIC:"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -1.570155</code></pre>
+</div>
+</div>
+<p>The p-values for the Ljung-Box statistic are low, the ACF of residuals is near 0, and the residuals are generally normally distributed, as we can see in the Q-Q plot. All of these things suggest that the model we chose is a good fit for the data. Let’s compare this model to a model which removes the seasonal AR component, to make sure our choice of model is good.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">=</span> <span class="fu">sarima</span>(TempTS, <span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>, <span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>, <span class="dv">12</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>model2<span class="sc">$</span>ttable</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     Estimate     SE  t.value p.value
+ar1    0.4581 0.0312  14.6943       0
+ar2    0.1982 0.0295   6.7273       0
+ma1   -0.9564 0.0176 -54.4053       0
+sma1  -0.9577 0.0097 -98.4798       0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"AIC:"</span>); <span class="fu">print</span>(model2<span class="sc">$</span>AIC)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "AIC:"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -1.568819</code></pre>
+</div>
+</div>
+<p>This model has a higher AIC, suggesting that our first model is the better one. So we will use the model <span class="math inline">\(\text{SARIMA}(2,1,1)(2,1,1)_{12}\)</span>.</p>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="threshold-model" class="level3">
+<h3 class="anchored" data-anchor-id="threshold-model">Threshold Model</h3>
+<p>In our SARIMA model, we found that there is seasonality present with P = 2. The threshold model doesn’t have a seasonal component, so we are going to try using some high values to try to capture some of the seasonality, like in our SARIMA model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>bestp <span class="ot">=</span> <span class="dv">3</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>bestAIC <span class="ot">=</span> <span class="fu">tar</span>(TempTS, <span class="at">p1 =</span> <span class="dv">3</span>, <span class="at">p2 =</span> <span class="dv">3</span>, <span class="at">d =</span> <span class="dv">1</span>)<span class="sc">$</span>AIC</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(k <span class="cf">in</span> <span class="fu">c</span>(<span class="dv">6</span>,<span class="dv">12</span>,<span class="dv">18</span>,<span class="dv">24</span>,<span class="dv">30</span>,<span class="dv">36</span>)){</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  foundaic <span class="ot">=</span> <span class="fu">tar</span>(TempTS, <span class="at">p1 =</span> k, <span class="at">p2 =</span> k, <span class="at">d =</span> <span class="dv">1</span>)<span class="sc">$</span>AIC</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (foundaic <span class="sc">&lt;</span> bestAIC){</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    bestp <span class="ot">=</span> k</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    bestAIC <span class="ot">=</span> foundaic</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(bestp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 24</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(bestAIC)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    1 
+-2559 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>tmodel <span class="ot">&lt;-</span> <span class="fu">tar</span>(TempTS, <span class="at">p1 =</span> bestp, <span class="at">p2 =</span> bestp, <span class="at">d =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We find that the AIC of the model with <code>p1 = 24</code> and <code>p2 = 24</code> is the best model in our search. This makes sense, because with <code>P = 2</code> and <code>s = 12</code> in the SARIMA model, we should expect <code>2*12</code> to be a reasonable choice for <code>p1</code> and <code>p2</code>.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="forecasting" class="level2">
+<h2 class="anchored" data-anchor-id="forecasting">Forecasting</h2>
+<section id="sarima-2" class="level3">
+<h3 class="anchored" data-anchor-id="sarima-2">SARIMA</h3>
+<p>I decided to fit a <span class="math inline">\(\text{SARIMA}(2,1,1)(2,1,1)_{12}\)</span> for the SARIMA model. Let’s forecast the next 24 months for this model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sarima.for</span>(TempTS, <span class="at">n.ahead =</span> <span class="dv">2</span><span class="sc">*</span><span class="dv">12</span>, <span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>, <span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>, <span class="dv">12</span>, <span class="at">col =</span> <span class="st">"darkgrey"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">rollmean</span>(TempTS,<span class="dv">3</span>),<span class="at">col =</span> <span class="st">"darkgreen"</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">rollmean</span>(TempTS,<span class="dv">3</span>),<span class="at">col =</span> <span class="st">"darkgreen"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The forecast looks much smoother than the original data that came before it. This is likely because there is a lot of noise in the original temperature data. We would expect this because in the PACF graph, the absolute value of the correlation tapers off, suggesting the data is better modeled through its moving average. I’ve superimposed the 3-month moving average on top of the original data using <code>rollmean()</code>.</p>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="threshold-model-1" class="level3">
+<h3 class="anchored" data-anchor-id="threshold-model-1">Threshold Model</h3>
+<p>Let’s use our threshold model to predict the next 24 months of temperature.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">=</span> <span class="fu">predict</span>(tmodel, <span class="at">n.ahead =</span> n<span class="sc">*</span><span class="dv">12</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>lastTempTS <span class="ot">=</span> <span class="fu">ts</span>(<span class="fu">tail</span>(TempTS,<span class="dv">120</span>),<span class="at">start=</span><span class="fu">c</span>(<span class="dv">2007</span>,<span class="dv">1</span>),<span class="at">frequency=</span><span class="dv">12</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>timepreds <span class="ot">=</span> <span class="fu">ts</span>(preds<span class="sc">$</span>fit,<span class="at">start=</span><span class="fu">c</span>(<span class="dv">2017</span>,<span class="dv">1</span>),<span class="at">frequency=</span><span class="dv">12</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>timeconflow <span class="ot">=</span> <span class="fu">ts</span>(<span class="fu">t</span>(preds<span class="sc">$</span>pred.interval)[,<span class="dv">1</span>],<span class="at">start=</span><span class="fu">c</span>(<span class="dv">2017</span>,<span class="dv">1</span>),<span class="at">frequency=</span><span class="dv">12</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>timeconfup <span class="ot">=</span> <span class="fu">ts</span>(<span class="fu">t</span>(preds<span class="sc">$</span>pred.interval)[,<span class="dv">2</span>],<span class="at">start=</span><span class="fu">c</span>(<span class="dv">2017</span>,<span class="dv">1</span>),<span class="at">frequency=</span><span class="dv">12</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>timeconf <span class="ot">=</span> <span class="fu">tibble</span>(<span class="fu">c</span>(timeconflow,<span class="fu">rev</span>(timeconfup)),<span class="fu">c</span>(<span class="fu">time</span>(timeconflow),<span class="fu">rev</span>(<span class="fu">time</span>(timeconfup))))</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(lastTempTS,<span class="at">col=</span><span class="st">"black"</span>,<span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">2007</span>,<span class="dv">2017</span><span class="sc">+</span>n))</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(lastTempTS,<span class="at">col=</span><span class="st">"black"</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="at">x =</span> <span class="fu">unlist</span>(<span class="fu">as.list</span>(timeconf[,<span class="dv">2</span>])), <span class="at">y =</span> <span class="fu">unlist</span>(<span class="fu">as.list</span>(timeconf[,<span class="dv">1</span>])), <span class="at">col=</span><span class="st">"grey87"</span>,<span class="at">border=</span><span class="st">"grey60"</span>)</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(timepreds,<span class="at">col=</span><span class="st">"red"</span>)</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(timepreds,<span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>This looks like a reasonable prediction.</p>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="comparison" class="level3">
+<h3 class="anchored" data-anchor-id="comparison">Comparison</h3>
+<p>I want to overlay our two predictions and see how they are similar and how they differ. I’m curious if they agree or disagree in the short-term.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sarima.for</span>(TempTS, <span class="at">n.ahead =</span> <span class="dv">12</span><span class="sc">*</span>n, <span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>, <span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>, <span class="dv">12</span>, <span class="at">col =</span> <span class="st">"darkgrey"</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">rollmean</span>(TempTS,<span class="dv">3</span>),<span class="at">col =</span> <span class="st">"darkgreen"</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">rollmean</span>(TempTS,<span class="dv">3</span>),<span class="at">col =</span> <span class="st">"darkgreen"</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(timepreds,<span class="at">col=</span><span class="st">"purple"</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(timepreds,<span class="at">col=</span><span class="st">"purple"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>They seem to peak and dip at similar times, however the threshold model predicts a smaller dip after the second peak. We can see that the prediction from the threshold model falls within the inner confidence interval of the SARIMA model. I would be interested to see if the structure of the auto regressive components in the threshold model reflects the structure of the auto regressive component in the SARIMA model.</p>
+<p>Just for fun, let’s see how our models would project the next 80 years. Because this is such a long time span, there should be a lower confidence in the prediction. However, this might reveal what our models think the general trends in the data show.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">=</span> <span class="dv">80</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">=</span> <span class="fu">predict</span>(tmodel, <span class="at">n.ahead =</span> n<span class="sc">*</span><span class="dv">12</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>lastTempTS <span class="ot">=</span> <span class="fu">ts</span>(<span class="fu">tail</span>(TempTS,<span class="dv">120</span>),<span class="at">start=</span><span class="fu">c</span>(<span class="dv">2007</span>,<span class="dv">1</span>),<span class="at">frequency=</span><span class="dv">12</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>timepreds <span class="ot">=</span> <span class="fu">ts</span>(preds<span class="sc">$</span>fit,<span class="at">start=</span><span class="fu">c</span>(<span class="dv">2017</span>,<span class="dv">1</span>),<span class="at">frequency=</span><span class="dv">12</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sarima.for</span>(TempTS, <span class="at">n.ahead =</span> <span class="dv">12</span><span class="sc">*</span>n, <span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>, <span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>, <span class="dv">12</span>, <span class="at">col =</span> <span class="st">"darkgrey"</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">rollmean</span>(TempTS,<span class="dv">3</span>),<span class="at">col =</span> <span class="st">"darkgreen"</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">rollmean</span>(TempTS,<span class="dv">3</span>),<span class="at">col =</span> <span class="st">"darkgreen"</span>)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(timepreds,<span class="at">col=</span><span class="st">"purple"</span>)</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(timepreds,<span class="at">col=</span><span class="st">"purple"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>On the whole, our models tend to agree up until around 2060. The SARIMA model predicts a linear increase, while the TAR model seems to predict an exponential increase, or some other function. This shows that the TAR model is a bit more flexible than the SARIMA model in some situations. Regardless, both of our models predict an increase in global temperature, which is also what the <a href="https://science2017.globalchange.gov/chapter/executive-summary/">study</a> had forecast.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Time series forecasting helps us make predictions about the future so we can better prepare for it. In this report, I used two types of auto regressive models to forecast global mean temperature. As expected, I found temperatures are rising on average, and swells in temperature cycle with a 12 month period. Both models performed fairly well, and made similar predictions in both the short and long term. I found that the TAR model was more flexible, but this could possibly mean over fitting in comparison to the SARIMA model because we used such a large order. If I were to expand this project, I think it would be a good idea to start with a train/test split so we could compare our models quantitatively.</p>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="references-and-appendix" class="level2">
+<h2 class="anchored" data-anchor-id="references-and-appendix">References and Appendix</h2>
+<section id="references" class="level3">
+<h3 class="anchored" data-anchor-id="references">References</h3>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Citation or Link</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Global Mean Temperature Dataset</td>
+<td><a href="https://datahub.io/core/global-temp#readme" class="uri">https://datahub.io/core/global-temp#readme</a></td>
+</tr>
+<tr class="even">
+<td>NASA GISTEMP</td>
+<td><a href="https://data.giss.nasa.gov/gistemp/" class="uri">https://data.giss.nasa.gov/gistemp/</a></td>
+</tr>
+<tr class="odd">
+<td>Study by the U.S. Global Change Research Program</td>
+<td><a href="https://science2017.globalchange.gov/chapter/executive-summary/" class="uri">https://science2017.globalchange.gov/chapter/executive-summary/</a><br><br>Wuebbles, D.J., D.W. Fahey, K.A. Hibbard, B. DeAngelo, S. Doherty, K. Hayhoe, R. Horton, J.P. Kossin, P.C. Taylor, A.M. Waple, and C.P. Weaver, 2017: Executive summary. In: Climate Science Special Report: Fourth National Climate Assessment, Volume I [Wuebbles, D.J., D.W. Fahey, K.A. Hibbard, D.J. Dokken, B.C. Stewart, and T.K. Maycock (eds.)]. U.S. Global Change Research Program, Washington, DC, USA, pp.&nbsp;12-34, doi: 10.7930/J0DJ5CTG.</td>
+</tr>
+<tr class="even">
+<td>Time Series Analysis and its Applications</td>
+<td>Shumway, R. H., &amp; Stoffer, D. S. (2017). Time series analysis and its applications: With R examples. Springer.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="appendix" class="level3">
+<h3 class="anchored" data-anchor-id="appendix">Appendix</h3>
+<p>No supplementary materials.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

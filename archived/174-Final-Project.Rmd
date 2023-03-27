@@ -1,0 +1,36 @@
+---
+title: "174-Final-Project"
+output:
+  pdf_document: default
+  html_document: default
+date: "2023-02-25"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(astsa)
+library(timeSeries)
+```
+
+```{r,warning=FALSE}
+BitRaw <- read.csv("CBBTCUSD.csv")
+BitPrice <- BitRaw$CBBTCUSD %>% ts(start=c(2015,1),frequency=12)
+plot(BitPrice)
+plot(log(BitPrice))
+```
+
+```{r,warning=FALSE}
+y = log(BitPrice) %>% diff(lag=12) %>% diff() %>% diff()
+plot(y)
+acf(y,40); pacf(y,40)
+```
+
+From these graphs, we can see that the model $\text{SARIMA}(11,2,11)\times(1,1,1)_{12}$ may be a good fit.
+
+```{r,warning=FALSE}
+sarima.for(log(BitPrice), n.ahead = 12, 11,2,11, 1,1,1, 4)
+```
